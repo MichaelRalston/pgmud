@@ -1,0 +1,8 @@
+v0.0.1: initial commit.
+v0.1.0: when it is possible to fulfill milestone 1. (read adjectives from a spreadsheet)
+v0.2.0: when a first-pass weapon can be generated.
+v0.3.0: when a skill can be generated (non-randomly acceptable, if it can make the fixed starter skills)
+v0.4.0: when armor can be generated.
+v0.5.0: when a character can be generated with starter gear.
+v0.6.0: when two starter-gear characters can be generated and fight.
+v1.0.0: when a character can wander a dungeon.
