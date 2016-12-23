@@ -16,9 +16,7 @@ import PGMUD.Adjectives
     
 generateWeapon :: PGMUD m => [Adjective] -> m Weapon
 generateWeapon configuration = do
-    typeAdjs <- adjWeaponTypes
-    elemAdjs <- adjWeaponElements
-    adjectives <- buildAdjectiveList [typeAdjs, elemAdjs, elemAdjs] configuration
+    adjectives <- buildAdjectiveList [ATWeaponClass, ATWeaponElement, ATWeaponElement] configuration
     return $ Weapon adjectives
     
 weaponClass :: Weapon -> WeaponClass

@@ -6,6 +6,7 @@ module PGMUD.Types.Adjective
     , AdjectiveModifier (..)
     , AdjectiveId (..)
     , AdjectiveInteraction (..)
+    , AdjectiveType (..)
     ) where
     
 import PGMUD.Prelude
@@ -13,11 +14,13 @@ import PGMUD.Types.Gear
 import PGMUD.Types.Stats
 
 import Data.Csv (FromNamedRecord(..), (.:), FromField(..), NamedRecord, Parser)
+import qualified Data.Text as T
 
-newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField)
-data AdjectiveContext = ACWeapon | ACSkill
-data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat
-data AdjectiveInteraction = AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass
+newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
+data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
+data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat deriving (Show)
+data AdjectiveType = ATWeaponClass | ATWeaponElement deriving (Show)
+data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass deriving (Eq, Show)
 -- current proposal: excludes column, of semicolon-separated values. "interaction-ELEMENT" and "interaction-WEAPON", each with one of: blank, +, -, y, n (y/n element only: hates/needs)
     
 instance FromField AdjectiveContext where
@@ -46,6 +49,28 @@ instance FromField DefaultToZero where
 buildRange :: (Enum a, Bounded a, Nameable a) => NamedRecord -> Parser [(Float, a)]
 buildRange m = mapM (\e -> ((\(DefaultToZero a) -> (a, e)) <$> (m .: name e))) [minBound..maxBound]
 
+readInteractions :: NamedRecord -> Parser [AdjectiveInteraction]
+readInteractions m = let
+    readWeapon :: WeaponClass -> Text -> Parser AdjectiveInteraction
+    readWeapon _ "" = pure AINoInteraction
+    readWeapon w "+" = pure $ AILikesWeapon w
+    readWeapon w "-" = pure $ AIDislikesWeapon w
+    readWeapon _ _ = mzero
+    readElement :: Element -> Text -> Parser AdjectiveInteraction
+    readElement _ "" = pure AINoInteraction
+    readElement e "+" = pure $ AILikesElement e
+    readElement e "-" = pure $ AIDislikesElement e
+    readElement e "y" = pure $ AINeedsElement e
+    readElement e "n" = pure $ AIHatesElement e
+    readElement _ _ = mzero
+    aiWeapons = mapM (\w -> readWeapon w =<< (m .: ("interaction-" <> name w))) [minBound..maxBound]
+    aiElements = mapM (\e -> readElement e =<< (m .: ("interaction-" <> name e))) [minBound..maxBound]
+    baseExcludes = m .: "excludes"
+    splitExcludes = T.split (== ';') <$> baseExcludes
+    aiExcludes = map (AIExclusive . AdjectiveId) <$> splitExcludes
+  in
+    filter (/= AINoInteraction) <$> mconcat [aiElements, aiWeapons, aiExcludes]
+
 instance FromNamedRecord Adjective where
     parseNamedRecord m = let 
         so = m .: "sort order"
@@ -56,7 +81,7 @@ instance FromNamedRecord Adjective where
         amDerived = map (mapSnd AMDerivedStat) <$> buildRange m
         amBase = map (mapSnd AMBaseStat) <$> buildRange m
         modifiers = filter (\a -> fst a /= 0) <$> mconcat [amElements, amDerived, amBase]
-        interactions = undefined
+        interactions = readInteractions m
         adjid = m .: "id"
         element = (\a -> if fst a /= 0 then Just (snd a) else Nothing) <$> foldl' (\l r -> if fst l > fst r then l else r) (0, minBound) <$> elements
         weapon = m .: "weapon class"

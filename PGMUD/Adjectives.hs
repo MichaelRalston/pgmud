@@ -24,6 +24,7 @@ combineWeights (AWValue i') (AWElements n h i) = AWElements n h (i+i')
 combineWeights (AWElements n h i) (AWElements n' h' i') = AWElements (sortUniq (n++n')) (sortUniq (h++h')) (i+i')
 
 applyInteraction :: AdjectiveInteraction -> Adjective -> AdjectiveWeight
+applyInteraction (AINoInteraction) _ = AWValue 0
 applyInteraction (AIExclusive aid) a = if aid == adjId a then AWBanned else AWValue 0
 applyInteraction (AILikesElement e) a = if Just e == adjElem a then AWValue 1 else AWValue 0
 applyInteraction (AIDislikesElement e) a = if Just e == adjElem a then AWValue (-1) else AWValue 0
@@ -59,5 +60,8 @@ generateAdjective sourceList preChosen rng = let
   in
     (preChosen ++ chosen, rng')
 
-buildAdjectiveList :: PGMUD m => [[Adjective]] -> [Adjective] -> m [Adjective]
-buildAdjectiveList = flip $ foldM (\l r -> withRandom $ generateAdjective l r)
+-- TODO: Some kind of templating system, to make it easier to select different adjective templates.
+buildAdjectiveList :: PGMUD m => [AdjectiveType] -> [Adjective] -> m [Adjective]
+buildAdjectiveList ats context = do
+    sources <- mapM getAdjectiveList ats
+    (flip $ foldM (\l r -> withRandom $ generateAdjective l r)) sources context

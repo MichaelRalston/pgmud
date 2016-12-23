@@ -8,8 +8,8 @@ module PGMUD.Types.Gear
 import PGMUD.Prelude
 import Data.Csv (FromField(..))
     
-data WeaponClass = Staff | Book | Fist | Axe | Orb | Wand | Rapier | Spear | Bow | Dagger | Whip | TwoHanded | Thrown deriving (Eq, Ord, Bounded, Enum)
-data ItemLevel = ItemLevel -- obviously there needs to be data here, but ...
+data WeaponClass = Staff | Book | Fist | Axe | Orb | Wand | Rapier | Spear | Bow | Dagger | Whip | TwoHanded | Thrown deriving (Eq, Ord, Bounded, Enum, Show)
+data ItemLevel = ItemLevel deriving (Show) -- obviously there needs to be data here, but ...
 
 instance Nameable WeaponClass where
     name Staff = "staff"

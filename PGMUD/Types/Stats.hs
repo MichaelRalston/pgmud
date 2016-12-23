@@ -9,11 +9,11 @@ module PGMUD.Types.Stats
 import PGMUD.Prelude
     
 data DerivedStat = HP | PD | SD | AP | EV | ACC | PA | SA
-    deriving (Eq, Ord, Enum, Bounded)
+    deriving (Eq, Ord, Enum, Bounded, Show)
 data BaseStat = Stamina | Willpower | Health | Defense | Offense | Mental | Physical | Mind | Body | Dexterity | Skill | Energy | Maneuver | Technique | Cleverness
-    deriving (Eq, Ord, Enum, Bounded)
+    deriving (Eq, Ord, Enum, Bounded, Show)
 data Element = Air | Earth | Fire | Water | Order | Chaos | Light | Metal | Blood | Decay
-    deriving (Eq, Ord, Enum, Bounded)
+    deriving (Eq, Ord, Enum, Bounded, Show)
     
 instance Nameable Element where
     name Air = "air"

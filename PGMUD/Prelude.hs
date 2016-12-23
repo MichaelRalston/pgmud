@@ -6,6 +6,7 @@ module PGMUD.Prelude
     , IsString
     , Nameable (..)
     , mapSnd
+    , (<>)
     ) where
     
 import Data.ByteString (ByteString)
@@ -13,6 +14,7 @@ import Data.Text (Text)
 import Control.Monad (MonadPlus(..))
 import Data.List (foldl')
 import Data.String (IsString)
+import Data.Monoid ((<>))
 
 class Nameable a where
     name :: IsString s => a -> s
