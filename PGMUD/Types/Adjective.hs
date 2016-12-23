@@ -39,12 +39,12 @@ data Adjective = Adjective
     , adjElem :: Maybe Element
     , adjWeapon :: Maybe WeaponClass
     , adjLevel :: ItemLevel
-    }
+    } deriving (Show)
     
 newtype DefaultToZero = DefaultToZero Float deriving (Num, Eq, Ord)
 instance FromField DefaultToZero where
     parseField "" = pure 0
-    parseField s = parseField s
+    parseField s = DefaultToZero <$> parseField s
     
 buildRange :: (Enum a, Bounded a, Nameable a) => NamedRecord -> Parser [(Float, a)]
 buildRange m = mapM (\e -> ((\(DefaultToZero a) -> (a, e)) <$> (m .: name e))) [minBound..maxBound]
@@ -67,9 +67,9 @@ readInteractions m = let
     aiElements = mapM (\e -> readElement e =<< (m .: ("interaction-" <> name e))) [minBound..maxBound]
     baseExcludes = m .: "excludes"
     splitExcludes = T.split (== ';') <$> baseExcludes
-    aiExcludes = map (AIExclusive . AdjectiveId) <$> splitExcludes
+    aiExcludes = (map (AIExclusive . AdjectiveId) <$> splitExcludes)
   in
-    filter (/= AINoInteraction) <$> mconcat [aiElements, aiWeapons, aiExcludes]
+    filter (/= AINoInteraction) <$> concat <$> sequence [aiElements, aiWeapons, aiExcludes]
 
 instance FromNamedRecord Adjective where
     parseNamedRecord m = let 
