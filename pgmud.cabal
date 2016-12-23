@@ -19,6 +19,6 @@ executable pgmud
   main-is:             Main.hs
   -- other-modules:       
   other-extensions:    ScopedTypeVariables, RecordWildCards
-  build-depends:       base, bytestring, text, random, Unique, cassava, vector
+  build-depends:       base, bytestring, text, random, Unique, cassava, vector, containers, transformers
   -- hs-source-dirs:      
   default-language:    Haskell2010

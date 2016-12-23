@@ -19,7 +19,7 @@ import qualified Data.Text as T
 newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
 data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
 data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat deriving (Show)
-data AdjectiveType = ATWeaponClass | ATWeaponElement deriving (Show)
+data AdjectiveType = ATWeaponClass | ATWeaponElement deriving (Show, Eq, Ord)
 data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass deriving (Eq, Show)
 -- current proposal: excludes column, of semicolon-separated values. "interaction-ELEMENT" and "interaction-WEAPON", each with one of: blank, +, -, y, n (y/n element only: hates/needs)
     
