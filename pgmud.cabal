@@ -17,7 +17,21 @@ cabal-version:       >=1.10
 
 executable pgmud
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:
+        PGMUD.Adjectives
+        PGMUD.PGMUD
+        PGMUD.Prelude
+        PGMUD.Skills
+        PGMUD.TopLevel
+        PGMUD.Types
+        PGMUD.Types.Adjective
+        PGMUD.Types.Effect
+        PGMUD.Types.Gear
+        PGMUD.Types.Skill
+        PGMUD.Types.Stats
+        PGMUD.Types.Weapon
+        PGMUD.Weapons
+          
   other-extensions:    ScopedTypeVariables, RecordWildCards
   build-depends:       base, bytestring, text, random, Unique, cassava, vector, containers, transformers
   -- hs-source-dirs:      

@@ -13,6 +13,8 @@ module PGMUD.Prelude
     , traceShow
     , trace
     , traceWith
+    , traceM
+    , traceShowM
     ) where
     
 import Data.ByteString (ByteString)
@@ -23,7 +25,7 @@ import Data.List (foldl')
 import Data.String (IsString)
 import Data.Monoid ((<>))
 
-import Debug.Trace (traceShow, trace)
+import Debug.Trace (traceShow, trace, traceM, traceShowM)
 
 class Nameable a where
     name :: IsString s => a -> s

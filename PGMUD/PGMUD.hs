@@ -5,7 +5,7 @@ module PGMUD.PGMUD
     , StdGen
     , HasAdjectives(..)
     , WithRandom(..)
-    , AdjectiveState (..)
+    , PGMUDState (..)
     , module PGMUD.Types
     ) where
     
@@ -15,7 +15,7 @@ import Control.Monad.IO.Class (liftIO, MonadIO)
 import Data.Map.Strict (Map, (!))
 import Control.Monad.Trans.State.Lazy (StateT, get)
 
-data AdjectiveState = AdjectiveState { 
+data PGMUDState = PGMUDState { 
         adjectiveTable :: Map AdjectiveType [Adjective]
     } deriving (Show)
 
@@ -30,8 +30,10 @@ class (Monad m, WithRandom m, HasAdjectives m) => PGMUD m
 instance MonadIO m => WithRandom m where
     withRandom = liftIO . getStdRandom
     
-instance Monad m => HasAdjectives (StateT AdjectiveState m) where
+instance Monad m => HasAdjectives (StateT PGMUDState m) where
     getAdjectiveList at = do
         s <- get
         let table = adjectiveTable s
         return $ table ! at
+        
+instance PGMUD (StateT PGMUDState IO)

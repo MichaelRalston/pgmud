@@ -4,4 +4,4 @@ module PGMUD.Types.Weapon
 
 import PGMUD.Types.Adjective
     
-data Weapon = Weapon [Adjective]
+data Weapon = Weapon [Adjective] deriving (Show)
