@@ -1,8 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module PGMUD.Types.Stats
-    ( Element (..)
-    , DerivedStat (..)
+    ( DerivedStat (..)
     , BaseStat (..)
     ) where
     
@@ -12,21 +11,7 @@ data DerivedStat = HP | PD | SD | AP | EV | ACC | PA | SA
     deriving (Eq, Ord, Enum, Bounded, Show)
 data BaseStat = Stamina | Willpower | Health | Defense | Offense | Mental | Physical | Mind | Body | Dexterity | Skill | Energy | Maneuver | Technique | Cleverness
     deriving (Eq, Ord, Enum, Bounded, Show)
-data Element = Air | Earth | Fire | Water | Order | Chaos | Light | Metal | Blood | Decay
-    deriving (Eq, Ord, Enum, Bounded, Show)
-    
-instance Nameable Element where
-    name Air = "air"
-    name Earth = "earth"
-    name Fire = "fire"
-    name Water = "water"
-    name Order = "order"
-    name Chaos = "chaos"
-    name Light = "light"
-    name Metal = "metal"
-    name Blood = "blood"
-    name Decay = "decay"
-    
+
 instance Nameable DerivedStat where
     name HP = "hp"
     name PD = "pd"

@@ -13,6 +13,9 @@ import PGMUD.PGMUD
 import PGMUD.Types.Weapon (Weapon(..))
 import PGMUD.Prelude
 import PGMUD.Adjectives
+import PGMUD.Types.Adjective (adjWeapon)
+
+import Data.Maybe (mapMaybe)
     
 generateWeapon :: PGMUD m => [Adjective] -> m Weapon
 generateWeapon configuration = do
@@ -20,7 +23,7 @@ generateWeapon configuration = do
     return $ Weapon adjectives
     
 weaponClass :: Weapon -> WeaponClass
-weaponClass = undefined
+weaponClass (Weapon adjs) = head $ mapMaybe adjWeapon adjs
 
 weaponEffect :: Weapon -> Effect
 weaponEffect = undefined

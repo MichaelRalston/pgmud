@@ -5,4 +5,5 @@ v0.3.0: when a skill can be generated (non-randomly acceptable, if it can make t
 v0.4.0: when armor can be generated.
 v0.5.0: when a character can be generated with starter gear.
 v0.6.0: when two starter-gear characters can be generated and fight.
+v0.7.0: when a character can move around some rooms, possibly in a simple fixed arrangement.
 v1.0.0: when a character can wander a dungeon.

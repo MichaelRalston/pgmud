@@ -26,6 +26,7 @@ executable pgmud
         PGMUD.Types
         PGMUD.Types.Adjective
         PGMUD.Types.Effect
+        PGMUD.Types.Elements
         PGMUD.Types.Gear
         PGMUD.Types.Skill
         PGMUD.Types.Stats

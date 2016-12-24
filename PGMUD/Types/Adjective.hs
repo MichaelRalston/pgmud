@@ -12,6 +12,7 @@ module PGMUD.Types.Adjective
 import PGMUD.Prelude
 import PGMUD.Types.Gear
 import PGMUD.Types.Stats
+import PGMUD.Types.Elements
 
 import Data.Csv (FromNamedRecord(..), (.:), FromField(..), NamedRecord, Parser)
 import qualified Data.Text as T
