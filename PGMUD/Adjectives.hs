@@ -33,7 +33,6 @@ applyInteraction (AINeedsElement e) a = if Just e == adjElem a then AWElements [
 applyInteraction (AILikesWeapon e) a = if Just e == adjWeapon a then AWValue 1 else AWValue 0
 applyInteraction (AIDislikesWeapon e) a = if Just e == adjWeapon a then AWValue (-1) else AWValue 0
 
-
 assignWeights :: [Adjective] -> Adjective -> (AdjectiveWeight, Adjective)
 assignWeights modifiers newAdjective = let
     weight = foldl' combineWeights (AWValue 0) interactions

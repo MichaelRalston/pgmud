@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, FlexibleInstances #-}
 
 module PGMUD.Types.Adjective
     ( Adjective (..)
@@ -99,3 +99,12 @@ instance Ord Adjective where
         LT -> LT
         GT -> GT
         
+instance HasElementalAffinities Adjective where
+    elementalAffinities = mconcat . (map elementalAffinities) . adjModifiers
+    
+instance HasElementalAffinities (Float, AdjectiveModifier) where
+    elementalAffinities (v, AMElement e) = let
+        ElementalAffinities l = mempty
+      in
+        ElementalAffinities (take (fromEnum e - 1) l ++ [ElementalAffinity v] ++ drop (fromEnum e) l)
+    elementalAffinities (_, _) = mempty

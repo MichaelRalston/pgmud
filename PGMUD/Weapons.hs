@@ -4,7 +4,6 @@ module PGMUD.Weapons
     ( generateWeapon
     , weaponClass
     , weaponEffect
-    , weaponElements
     , weaponLevel
     , weaponName
     ) where
@@ -23,13 +22,10 @@ generateWeapon configuration = do
     return $ Weapon adjectives
     
 weaponClass :: Weapon -> WeaponClass
-weaponClass (Weapon adjs) = head $ mapMaybe adjWeapon adjs
+weaponClass w = head $ mapMaybe adjWeapon $ weaponAdjectives w
 
 weaponEffect :: Weapon -> Effect
 weaponEffect = undefined
-
-weaponElements :: Weapon -> ElementalAffinities
-weaponElements = undefined
 
 weaponLevel :: Weapon -> ItemLevel
 weaponLevel = undefined

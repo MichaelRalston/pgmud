@@ -3,5 +3,9 @@ module PGMUD.Types.Weapon
     ) where
 
 import PGMUD.Types.Adjective
+import PGMUD.Types.Elements
     
-data Weapon = Weapon [Adjective] deriving (Show)
+data Weapon = Weapon { weaponAdjectives :: [Adjective] } deriving (Show)
+
+instance HasElementalAffinities Weapon where
+    elementalAffinities = mconcat . (map elementalAffinities) . weaponAdjectives
