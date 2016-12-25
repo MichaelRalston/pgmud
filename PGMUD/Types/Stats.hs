@@ -60,3 +60,7 @@ instance EnumIndexedValues DerivedStat where
 class HasStatModifiers a where
     baseStatModifiers :: a -> (EIVOuterWrapper BaseStat)
     derivedStatModifiers :: a -> (EIVOuterWrapper DerivedStat)
+    
+instance (HasEIV a BaseStat, HasEIV a DerivedStat) => HasStatModifiers a where
+    baseStatModifiers = getEIV
+    derivedStatModifiers = getEIV

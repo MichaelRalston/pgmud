@@ -2,6 +2,7 @@
 
 module PGMUD.Types.GeneralClasses
     ( EnumIndexedValues (..)
+    , HasEIV (..)
     ) where
 
 class (Bounded e, Enum e) => EnumIndexedValues e where
@@ -20,3 +21,6 @@ class (Bounded e, Enum e) => EnumIndexedValues e where
 instance EnumIndexedValues e => Monoid (EIVOuterWrapper e) where
     mempty = wrapperConstructor $ map (\_ -> innerConstructor 0) ([minBound..maxBound] :: [e])
     mappend l r = wrapperConstructor $ zipWith (\l' r' -> innerConstructor (innerDestructor l' + innerDestructor r')) (wrapperDestructor l) (wrapperDestructor r)
+
+class EnumIndexedValues e => HasEIV a e where
+    getEIV :: a -> EIVOuterWrapper e

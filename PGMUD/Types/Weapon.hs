@@ -1,16 +1,13 @@
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, FlexibleContexts, UndecidableInstances #-}
+
 module PGMUD.Types.Weapon 
     ( Weapon(..)
     ) where
 
 import PGMUD.Types.Adjective
-import PGMUD.Types.Elements
-import PGMUD.Types.Stats
+import PGMUD.Types.GeneralClasses
     
 data Weapon = Weapon { weaponAdjectives :: [Adjective] } deriving (Show)
 
-instance HasElementalAffinities Weapon where
-    elementalAffinities = mconcat . (map elementalAffinities) . weaponAdjectives
-    
-instance HasStatModifiers Weapon where
-    baseStatModifiers = mconcat . (map baseStatModifiers) . weaponAdjectives
-    derivedStatModifiers = mconcat . (map derivedStatModifiers) . weaponAdjectives
+instance CanHasEIV e => HasEIV Weapon e where
+    getEIV = mconcat . (map getEIV) . weaponAdjectives

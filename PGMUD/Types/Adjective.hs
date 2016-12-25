@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, FlexibleInstances, UndecidableInstances, MultiParamTypeClasses, ConstraintKinds, FlexibleContexts #-}
 
 module PGMUD.Types.Adjective
     ( Adjective (..)
@@ -7,6 +7,7 @@ module PGMUD.Types.Adjective
     , AdjectiveId (..)
     , AdjectiveInteraction (..)
     , AdjectiveType (..)
+    , CanHasEIV
     ) where
     
 import PGMUD.Prelude
@@ -100,19 +101,19 @@ instance Ord Adjective where
         LT -> LT
         GT -> GT
         
-instance HasElementalAffinities (Float, AdjectiveModifier) where
-    elementalAffinities (v, AMElement e) = spliceAt (innerConstructor v) e mempty
-    elementalAffinities _ = mempty
+instance HasEIV (Float, AdjectiveModifier) Element where
+    getEIV (v, AMElement e) = spliceAt (innerConstructor v) e mempty
+    getEIV _ = mempty
     
-instance HasStatModifiers (Float, AdjectiveModifier) where    
-    baseStatModifiers (v, AMBaseStat e) = spliceAt (innerConstructor v) e mempty
-    baseStatModifiers _ = mempty
-    derivedStatModifiers (v, AMDerivedStat e) = spliceAt (innerConstructor v) e mempty
-    derivedStatModifiers _ = mempty
+instance HasEIV (Float, AdjectiveModifier) BaseStat where    
+    getEIV (v, AMBaseStat e) = spliceAt (innerConstructor v) e mempty
+    getEIV _ = mempty
+    
+instance HasEIV (Float, AdjectiveModifier) DerivedStat where    
+    getEIV (v, AMDerivedStat e) = spliceAt (innerConstructor v) e mempty
+    getEIV _ = mempty
 
-instance HasElementalAffinities Adjective where
-    elementalAffinities = mconcat . (map elementalAffinities) . adjModifiers
+type CanHasEIV e = (HasEIV (Float, AdjectiveModifier) e, EnumIndexedValues e)
     
-instance HasStatModifiers Adjective where    
-    baseStatModifiers = mconcat . (map baseStatModifiers) . adjModifiers
-    derivedStatModifiers = mconcat . (map derivedStatModifiers) . adjModifiers
+instance CanHasEIV e => HasEIV Adjective e where
+    getEIV = mconcat . (map getEIV) . adjModifiers

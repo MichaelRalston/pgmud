@@ -28,6 +28,9 @@ instance Nameable Element where
 class HasElementalAffinities a where
     elementalAffinities :: a -> (EIVOuterWrapper Element)
     
+instance HasEIV a Element => HasElementalAffinities a where
+    elementalAffinities = getEIV
+    
 instance EnumIndexedValues Element where
     newtype EIVWrapper Element = ElementalAffinity Float deriving (Num, Show, Fractional)
     newtype EIVOuterWrapper Element = ElementalAffinities [EIVWrapper Element] deriving (Show)
