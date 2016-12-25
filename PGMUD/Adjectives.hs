@@ -52,13 +52,13 @@ convertWeightToScore (AWElements{..}, adj) = if awNeeds == awHas then convertWei
     
 generateAdjective :: [Adjective] -> [Adjective] -> StdGen -> ([Adjective], StdGen)
 generateAdjective sourceList preChosen rng = let 
-    candidates = map (assignWeights preChosen) (traceTagged "sourceList" sourceList)
+    candidates = map (assignWeights preChosen) sourceList
     scoredCandidates = mapMaybe convertWeightToScore candidates
     scoreSum = foldl' (+) 0 $ map fst scoredCandidates
     (pos, rng') = randomR (0, scoreSum) rng
-    chosen = traceTagged "chosen" $ chooseAtPos (traceTagged "scoredCandidates" scoredCandidates) (traceTagged "pos" pos)
+    chosen = chooseAtPos scoredCandidates pos
   in
-    ((traceTagged "preChosen" preChosen) ++ chosen, rng')
+    (preChosen ++ chosen, rng')
 
 -- TODO: Some kind of templating system, to make it easier to select different adjective templates.
 buildAdjectiveList :: PGMUD m => [AdjectiveType] -> [Adjective] -> m [Adjective]
