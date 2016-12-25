@@ -8,6 +8,7 @@ module PGMUD.TopLevel
     , decodedAdjectiveList
     , getInitialState
     , HasElementalAffinities (..)
+    , HasStatModifiers (..)
     ) where
     
 import Prelude hiding (readFile)

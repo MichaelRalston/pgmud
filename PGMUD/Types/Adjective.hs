@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings, RecordWildCards, GeneralizedNewtypeDeriving, FlexibleInstances, UndecidableInstances, MultiParamTypeClasses #-}
 
 module PGMUD.Types.Adjective
     ( Adjective (..)
@@ -69,7 +69,7 @@ readInteractions m = let
     aiElements = mapM (\e -> readElement e =<< (m .: ("interaction-" <> name e))) [minBound..maxBound]
     baseExcludes = m .: "excludes"
     splitExcludes = T.split (== ';') <$> baseExcludes
-    aiExcludes = (map (AIExclusive . AdjectiveId) <$> splitExcludes)
+    aiExcludes = (map (AIExclusive . AdjectiveId) <$> filter (/= "") <$> splitExcludes)
   in
     filter (/= AINoInteraction) <$> concat <$> sequence [aiElements, aiWeapons, aiExcludes]
 
@@ -82,7 +82,7 @@ instance FromNamedRecord Adjective where
         amElements = map (mapSnd AMElement) <$> elements
         amDerived = map (mapSnd AMDerivedStat) <$> buildRange m
         amBase = map (mapSnd AMBaseStat) <$> buildRange m
-        modifiers = filter (\a -> fst a /= 0) <$> mconcat [amElements, amDerived, amBase]
+        modifiers = filter (\a -> fst a /= 0) <$> concat <$> sequence [amDerived, amBase, amElements]
         interactions = readInteractions m
         adjid = m .: "id"
         element = (\a -> if fst a /= 0 then Just (snd a) else Nothing) <$> foldl' (\l r -> if fst l > fst r then l else r) (0, minBound) <$> elements
@@ -100,9 +100,19 @@ instance Ord Adjective where
         LT -> LT
         GT -> GT
         
+instance HasElementalAffinities (Float, AdjectiveModifier) where
+    elementalAffinities (v, AMElement e) = spliceAt (innerConstructor v) e mempty
+    elementalAffinities _ = mempty
+    
+instance HasStatModifiers (Float, AdjectiveModifier) where    
+    baseStatModifiers (v, AMBaseStat e) = spliceAt (innerConstructor v) e mempty
+    baseStatModifiers _ = mempty
+    derivedStatModifiers (v, AMDerivedStat e) = spliceAt (innerConstructor v) e mempty
+    derivedStatModifiers _ = mempty
+
 instance HasElementalAffinities Adjective where
     elementalAffinities = mconcat . (map elementalAffinities) . adjModifiers
     
-instance HasElementalAffinities (Float, AdjectiveModifier) where
-    elementalAffinities (v, AMElement e) = spliceAt (ElementalAffinity v) e mempty
-    elementalAffinities (_, _) = mempty
+instance HasStatModifiers Adjective where    
+    baseStatModifiers = mconcat . (map baseStatModifiers) . adjModifiers
+    derivedStatModifiers = mconcat . (map derivedStatModifiers) . adjModifiers

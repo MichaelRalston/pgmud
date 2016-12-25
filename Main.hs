@@ -14,3 +14,5 @@ main = do
     traceShowM ("class", weaponClass w)
     traceShowM ("level", weaponLevel w)
     traceShowM ("elemental affinities", elementalAffinities w)
+    traceShowM ("base stats", baseStatModifiers w)
+    traceShowM ("derived stats", derivedStatModifiers w)
