@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses, TypeFamilies #-}
 
 module PGMUD.Types.Stats
     ( DerivedStat (..)
@@ -38,3 +38,4 @@ instance Nameable BaseStat where
     name Maneuver = "maneuver"
     name Technique = "technique"
     name Cleverness = "cleverness"
+    

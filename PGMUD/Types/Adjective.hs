@@ -10,6 +10,7 @@ module PGMUD.Types.Adjective
     ) where
     
 import PGMUD.Prelude
+import PGMUD.Types.GeneralClasses
 import PGMUD.Types.Gear
 import PGMUD.Types.Stats
 import PGMUD.Types.Elements
@@ -103,8 +104,5 @@ instance HasElementalAffinities Adjective where
     elementalAffinities = mconcat . (map elementalAffinities) . adjModifiers
     
 instance HasElementalAffinities (Float, AdjectiveModifier) where
-    elementalAffinities (v, AMElement e) = let
-        ElementalAffinities l = mempty
-      in
-        ElementalAffinities (take (fromEnum e - 1) l ++ [ElementalAffinity v] ++ drop (fromEnum e) l)
+    elementalAffinities (v, AMElement e) = spliceAt (ElementalAffinity v) e mempty
     elementalAffinities (_, _) = mempty

@@ -1,18 +1,18 @@
-{-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies #-}
 module PGMUD.Types.Elements
     ( Element (..)
     , ElementalAffinity (..)
-    , ElementalAffinities (..)
     , HasElementalAffinities (..)
     ) where
     
 import PGMUD.Prelude
+import PGMUD.Types.GeneralClasses
     
 data Element = Air | Earth | Fire | Water | Order | Chaos | Light | Metal | Blood | Decay
     deriving (Eq, Ord, Enum, Bounded, Show)
     
-newtype ElementalAffinity = ElementalAffinity Float deriving (Num, Show)
-data ElementalAffinities = ElementalAffinities [ElementalAffinity] deriving (Show)
+newtype ElementalAffinity = ElementalAffinity Float deriving (Num, Show, Fractional)
+--data ElementalAffinities = ElementalAffinities [ElementalAffinity] deriving (Show)
     
 instance Nameable Element where
     name Air = "air"
@@ -27,8 +27,9 @@ instance Nameable Element where
     name Decay = "decay"
 
 class HasElementalAffinities a where
-    elementalAffinities :: a -> ElementalAffinities
-    
-instance Monoid ElementalAffinities where
-    mempty = ElementalAffinities $ map (\_ -> ElementalAffinity 0) [minBound :: Element ..maxBound]
-    mappend (ElementalAffinities l) (ElementalAffinities r) = ElementalAffinities $ zipWith (+) l r 
+    elementalAffinities :: a -> (EIVWrapper ElementalAffinity)
+
+instance EnumIndexedValues ElementalAffinity Element where
+    data EIVWrapper ElementalAffinity = ElementalAffinities [ElementalAffinity] deriving (Show)
+    wrapperConstructor = ElementalAffinities
+    wrapperDestructor (ElementalAffinities ea) = ea
