@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving #-}
 
 module PGMUD.Types.Gear
     ( WeaponClass (..)
@@ -9,7 +9,7 @@ import PGMUD.Prelude
 import Data.Csv (FromField(..))
     
 data WeaponClass = Staff | Book | Fist | Axe | Orb | Wand | Rapier | Spear | Bow | Dagger | Whip | TwoHanded | Thrown deriving (Eq, Ord, Bounded, Enum, Show)
-data ItemLevel = ItemLevel deriving (Show) -- obviously there needs to be data here, but ...
+newtype ItemLevel = ItemLevel Int deriving (Show, Num, Eq, Ord) -- obviously there needs to be data here, but ...
 
 instance Nameable WeaponClass where
     name Staff = "staff"
@@ -27,7 +27,7 @@ instance Nameable WeaponClass where
     name Thrown = "thrown"
 
 instance FromField ItemLevel where
-    parseField _ = pure $ ItemLevel
+    parseField f = ItemLevel <$> parseField f
 
 -- TODO: This is inefficient. it should probably just pattern match against the possible names? But that's a little repetitive for now, so atm it's defined in terms of Nameable.
 instance FromField WeaponClass where

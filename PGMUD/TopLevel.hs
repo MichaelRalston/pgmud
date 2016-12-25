@@ -7,6 +7,7 @@ module PGMUD.TopLevel
     , testBody
     , decodedAdjectiveList
     , getInitialState
+    , HasElementalAffinities (..)
     ) where
     
 import Prelude hiding (readFile)
@@ -16,7 +17,7 @@ import PGMUD.Adjectives
 import PGMUD.Types
 import PGMUD.PGMUD
 import PGMUD.Types.Adjective (AdjectiveType (..))
-import PGMUD.Prelude hiding (readFile)
+import PGMUD.Prelude
 
 import qualified Data.Vector as Vector
 import Data.Csv (decodeByName)

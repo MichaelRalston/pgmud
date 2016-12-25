@@ -11,8 +11,8 @@ import PGMUD.Prelude
 data Element = Air | Earth | Fire | Water | Order | Chaos | Light | Metal | Blood | Decay
     deriving (Eq, Ord, Enum, Bounded, Show)
     
-newtype ElementalAffinity = ElementalAffinity Float deriving Num
-data ElementalAffinities = ElementalAffinities [ElementalAffinity]
+newtype ElementalAffinity = ElementalAffinity Float deriving (Num, Show)
+data ElementalAffinities = ElementalAffinities [ElementalAffinity] deriving (Show)
     
 instance Nameable Element where
     name Air = "air"

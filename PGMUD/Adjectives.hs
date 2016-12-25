@@ -9,6 +9,7 @@ import PGMUD.Prelude
 import PGMUD.PGMUD
 import PGMUD.Types.Adjective
 import Control.Monad (foldM)
+import Data.List (sortBy)
 import Data.List.Unique (sortUniq)
 import Data.Maybe (mapMaybe)
 import System.Random (randomR)
@@ -42,7 +43,7 @@ assignWeights modifiers newAdjective = let
 
 chooseAtPos :: (Ord b, Num b) => [(b, a)] -> b -> [a]
 chooseAtPos [] _ = []
-chooseAtPos ((score, r):rest) pos = if score <= pos then [r] else chooseAtPos rest (pos-score)
+chooseAtPos ((score, r):rest) pos = if score >= pos then [r] else chooseAtPos rest (pos-score)
     
 convertWeightToScore :: (AdjectiveWeight, Adjective) -> Maybe (Double, Adjective)
 convertWeightToScore (AWBanned, _) = Nothing
@@ -51,16 +52,18 @@ convertWeightToScore (AWElements{..}, adj) = if awNeeds == awHas then convertWei
     
 generateAdjective :: [Adjective] -> [Adjective] -> StdGen -> ([Adjective], StdGen)
 generateAdjective sourceList preChosen rng = let 
-    candidates = map (assignWeights preChosen) sourceList
+    candidates = map (assignWeights preChosen) (traceTagged "sourceList" sourceList)
     scoredCandidates = mapMaybe convertWeightToScore candidates
     scoreSum = foldl' (+) 0 $ map fst scoredCandidates
     (pos, rng') = randomR (0, scoreSum) rng
-    chosen = chooseAtPos scoredCandidates pos
+    chosen = traceTagged "chosen" $ chooseAtPos (traceTagged "scoredCandidates" scoredCandidates) (traceTagged "pos" pos)
   in
-    (preChosen ++ chosen, rng')
+    ((traceTagged "preChosen" preChosen) ++ chosen, rng')
 
 -- TODO: Some kind of templating system, to make it easier to select different adjective templates.
 buildAdjectiveList :: PGMUD m => [AdjectiveType] -> [Adjective] -> m [Adjective]
 buildAdjectiveList ats context = do
     sources <- mapM getAdjectiveList ats
-    (flip $ foldM (\l r -> withRandom $ generateAdjective l r)) sources context
+    
+    unsortedAdjectives <- (foldM (\l r -> withRandom $ generateAdjective r l)) context sources
+    return $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) unsortedAdjectives

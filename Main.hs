@@ -7,4 +7,10 @@ main :: IO ()
 main = do
     s <- getInitialState
     w <- evalStateT (generateWeapon []) s
-    traceShowM w
+    putStrLn "\n"
+    traceShowM ("weapon", w)
+    putStrLn "\n"
+    traceShowM ("name", weaponName w)
+    traceShowM ("class", weaponClass w)
+    traceShowM ("level", weaponLevel w)
+    traceShowM ("elemental affinities", elementalAffinities w)
