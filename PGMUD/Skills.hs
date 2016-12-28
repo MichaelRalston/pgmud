@@ -7,10 +7,11 @@ module PGMUD.Skills
 import PGMUD.PGMUD 
 import PGMUD.Types.Adjective
 import PGMUD.Types.AdjectiveGenerator
+import PGMUD.Types.Skill
 import qualified PGMUD.AdjectiveList as AdjectiveList
     
-skillElement :: Skill -> Element
-skillElement = undefined
+skillElement :: Skill -> Maybe Element
+skillElement = AdjectiveList.element . skillAdjectives
 
 skillCost :: Skill -> WeaponClass -> APAmount
 skillCost = undefined
