@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module PGMUD.Skills
     ( skillElement
     , skillCost
@@ -8,6 +9,7 @@ import PGMUD.PGMUD
 import PGMUD.Types.Adjective
 import PGMUD.Types.AdjectiveGenerator
 import PGMUD.Types.Skill
+import PGMUD.Adjectives
 import qualified PGMUD.AdjectiveList as AdjectiveList
     
 skillElement :: Skill -> Maybe Element
@@ -18,22 +20,27 @@ skillCost = undefined
 
 -- data AdjectiveGenerator m = (PGMUD m) => AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> m (Maybe (AdjectiveGenerator m), AdjectiveType) }
 -- data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeapon | ATSkillWeaponGroup | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
-skillGen :: PGMUD m => AdjectiveList -> m (Maybe (AdjectiveGenerator m), AdjectiveType)
-skillGen al = let
-    hasElement = case AdjectiveList.element al of
-        Nothing -> False
-        Just _ -> True
-    elementGen = return $ (Just $ AdjectiveGenerator skillGen, ATSkillElement)
-    attackGen = if hasElement
-        then undefined
-        else elementGen
-    defenseGen = undefined
-    chargeGen = undefined
-    parryGen = undefined
-    healGen = undefined
-  in
-    case AdjectiveList.skillClassification al of
-        Nothing -> return $ (Just $ AdjectiveGenerator skillGen, ATSkillClassification)
+skillGen :: PGMUD m => AdjectiveGenerator m
+skillGen = AdjectiveGenerator $ \context -> do
+    let
+        hasElement = case AdjectiveList.element context of
+            Nothing -> False
+            Just _ -> True
+        elementGen = return $ (Just skillGen, ATSkillElement)
+        attackGen = if hasElement
+            then undefined
+            else elementGen
+        defenseGen = undefined
+        chargeGen = undefined
+        parryGen = undefined
+        healGen = undefined
+        selectQuality = undefined
+        qualityGen = AdjectiveGenerator $ \qualityContext -> do
+            qualityChoice <- withRandom selectQuality
+            let (AdjectiveGenerator {..}) = composedGen (simpleGen qualityChoice) skillGen
+            selectAdjectiveType qualityContext            
+    case AdjectiveList.skillClassification context of
+        Nothing -> return $ (Just qualityGen, ATSkillClassification)
         Just SCPiercing -> attackGen
         Just SCHoming -> attackGen
         Just SCStrike -> attackGen

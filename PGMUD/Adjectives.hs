@@ -3,6 +3,8 @@
 module PGMUD.Adjectives
     ( generateAdjective
     , buildAdjectiveList
+    , simpleGen
+    , composedGen
     ) where
     
 import PGMUD.Prelude
@@ -80,3 +82,9 @@ buildAdjectiveList ats context = do
     unsortedAdjectives <- generateAdjectives (simpleGen ats) context
     return $ AdjectiveList $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
     
+composedGen :: PGMUD m => AdjectiveGenerator m -> AdjectiveGenerator m -> AdjectiveGenerator m
+composedGen (AdjectiveGenerator{..}) r = AdjectiveGenerator $ \context -> do
+    (l, t) <- selectAdjectiveType context
+    case l of
+        Nothing -> return (Just r, t)
+        Just l' -> return (Just $ composedGen l' r, t)

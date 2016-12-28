@@ -27,7 +27,7 @@ class WithRandom m where
     
 class (Monad m, WithRandom m, HasAdjectives m) => PGMUD m
 
-instance MonadIO m => WithRandom m where
+instance MonadIO m => WithRandom (StateT PGMUDState m) where
     withRandom = liftIO . getStdRandom
     
 instance Monad m => HasAdjectives (StateT PGMUDState m) where
