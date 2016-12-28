@@ -26,9 +26,11 @@ executable pgmud
         PGMUD.TopLevel
         PGMUD.Types
         PGMUD.Types.Adjective
+        PGMUD.Types.AdjectiveGenerator
         PGMUD.Types.Effect
         PGMUD.Types.Elements
         PGMUD.Types.Gear
+        PGMUD.Types.GeneralClasses
         PGMUD.Types.Skill
         PGMUD.Types.Stats
         PGMUD.Types.Weapon

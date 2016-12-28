@@ -1,7 +1,8 @@
 module PGMUD.Types.Skill 
-    ( Skill(..)
+    ( Skill (..)
     ) where
 
 import PGMUD.Types.Adjective
     
-data Skill = Skill [Adjective]
+data Skill = Skill { skillAdjectives :: AdjectiveList }
+

@@ -5,22 +5,29 @@ module PGMUD.AdjectiveList
     , effect
     , itemLevel
     , stringify
+    , skillClassification
+    , element
     ) where
     
 import PGMUD.PGMUD 
 import PGMUD.Prelude
-import PGMUD.Adjectives
 import PGMUD.Types.Adjective
 
 import Safe (headMay)
 import Data.Maybe (mapMaybe)
 import Data.Text (intercalate)
 
+element :: AdjectiveList -> Maybe Element
+element (AdjectiveList al) = headMay $ mapMaybe adjElem al
+
 weaponClass :: AdjectiveList -> Maybe WeaponClass
-weaponClass (AdjectiveList al) = headMay $ mapMaybe adjWeapon $ al
+weaponClass (AdjectiveList al) = headMay $ mapMaybe adjWeapon al
+
+skillClassification :: AdjectiveList -> Maybe SkillClassification
+skillClassification (AdjectiveList al) = headMay $ mapMaybe adjClassification al
 
 effect :: AdjectiveList -> Maybe Effect
-effect (AdjectiveList al) = undefined
+effect (AdjectiveList _) = undefined
 
 itemLevel :: AdjectiveList -> ItemLevel
 itemLevel (AdjectiveList al) = sum $ map adjLevel al

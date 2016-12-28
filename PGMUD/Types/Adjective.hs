@@ -8,9 +8,9 @@ module PGMUD.Types.Adjective
     , AdjectiveInteraction (..)
     , AdjectiveType (..)
     , CanHasEIV
+    , SkillClassification (..)
     , AdjectiveList (..)
     , unwrapAdjectiveList
-    , AdjectiveGenerator (..)
     ) where
     
 import PGMUD.Prelude
@@ -26,10 +26,25 @@ import qualified Data.ByteString.Char8 as BSC
 data DamageType = DTSpecial | DTPhysical | DTHybrid | DTDynamic deriving (Show)
 newtype SkillEfficiency = SkillEfficiency Float deriving (Show, Eq, Ord, Num)
 
+data SkillClassification = SCPiercing | SCHoming | SCHeal | SCStrike | SCCharge | SCBlock | SCParry | SCDodge | SCFlurry | SCSmash | SCBerserk deriving (Enum, Ord, Show, Eq, Bounded)
+
+instance Nameable SkillClassification where
+    name SCPiercing = "piercing"
+    name SCHoming = "homing"
+    name SCHeal = "heal"
+    name SCStrike = "strike"
+    name SCCharge = "charge"
+    name SCBlock = "block"
+    name SCParry = "parry"
+    name SCDodge = "dodge"
+    name SCFlurry = "flurry"
+    name SCSmash = "smash"
+    name SCBerserk = "berserk"
+
 newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
 data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
 data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat | AMEfficiency SkillEfficiency | AMDamageType DamageType | AMMagnitude | AMEffect Effect deriving (Show)
-data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeapon | ATSkillWeaponGroup | ATWeaponQuality | ATSkillQuality | ATSkillClassification deriving (Show, Eq, Ord)
+data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeapon | ATSkillWeaponGroup | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
 data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass deriving (Eq, Show)
 -- current proposal: excludes column, of semicolon-separated values. "interaction-ELEMENT" and "interaction-WEAPON", each with one of: blank, +, -, y, n (y/n element only: hates/needs)
     
@@ -49,6 +64,7 @@ data Adjective = Adjective
     , adjElem :: Maybe Element
     , adjWeapon :: Maybe WeaponClass
     , adjLevel :: ItemLevel
+    , adjClassification :: Maybe SkillClassification
     } deriving (Show)
     
 {-newtype DefaultToZero a = DefaultToZero a deriving (Num, Eq, Ord)
@@ -134,8 +150,9 @@ instance FromNamedRecord Adjective where
         element = (\(f, AMElement a) -> if f /= 0 then Just a else Nothing) <$> foldl' (\l r -> if fst l > fst r then l else r) (0, AMElement minBound) <$> amElements
         weapon = (unwrapNameable <$>) <$> m .: "weapon class"
         level = m .: "ilvl"
+        skillClassification = (unwrapNameable <$>) <$> m .: "classification"
       in
-        Adjective <$> so <*> aName <*> context <*> modifiers <*> interactions <*> adjid <*> element <*> weapon <*> level
+        Adjective <$> so <*> aName <*> context <*> modifiers <*> interactions <*> adjid <*> element <*> weapon <*> level <*> skillClassification
     
 instance Eq Adjective where
     (==) l r = adjId l == adjId r
@@ -162,10 +179,8 @@ type CanHasEIV e = (HasEIV (Float, AdjectiveModifier) e, EnumIndexedValues e)
     
 instance CanHasEIV e => HasEIV Adjective e where
     getEIV = mconcat . (map getEIV) . adjModifiers
-
+    
 newtype AdjectiveList = AdjectiveList [Adjective] deriving (Monoid, Show)
 unwrapAdjectiveList :: AdjectiveList -> [Adjective]
 unwrapAdjectiveList (AdjectiveList al) = al
     
-newtype AdjectiveGenerator = AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> (Maybe AdjectiveGenerator, AdjectiveType) }
-

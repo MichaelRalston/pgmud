@@ -8,6 +8,7 @@ module PGMUD.Adjectives
 import PGMUD.Prelude
 import PGMUD.PGMUD
 import PGMUD.Types.Adjective
+import PGMUD.Types.AdjectiveGenerator
 import Data.List (sortBy)
 import Data.List.Unique (sortUniq)
 import Data.Maybe (mapMaybe)
@@ -59,9 +60,9 @@ generateAdjective sourceList preChosen rng = let
   in
     (preChosen ++ chosen, rng')
 
-generateAdjectives :: PGMUD m => AdjectiveGenerator -> AdjectiveList -> m AdjectiveList
-generateAdjectives gen context = do
-    let (gen', t) = selectAdjectiveType gen context
+generateAdjectives :: PGMUD m => AdjectiveGenerator m -> AdjectiveList -> m AdjectiveList
+generateAdjectives (AdjectiveGenerator{..}) context = do
+    (gen', t) <- selectAdjectiveType context
     source <- getAdjectiveList t
     list' <- withRandom $ generateAdjective source $ unwrapAdjectiveList context
     let list = AdjectiveList list'
@@ -69,10 +70,10 @@ generateAdjectives gen context = do
         Nothing -> return list
         Just gen'' -> generateAdjectives gen'' list
     
-simpleGen :: [AdjectiveType] -> AdjectiveGenerator
+simpleGen :: PGMUD m => [AdjectiveType] -> AdjectiveGenerator m
 simpleGen [] = error "Cannot generate an empty list"
-simpleGen (at:[]) = AdjectiveGenerator $ const (Nothing, at)
-simpleGen (at:rest) = AdjectiveGenerator $ const (Just $ simpleGen rest, at)
+simpleGen (at:[]) = AdjectiveGenerator $ const $ return (Nothing, at)
+simpleGen (at:rest) = AdjectiveGenerator $ const $ return (Just $ simpleGen rest, at)
     
 buildAdjectiveList :: PGMUD m => [AdjectiveType] -> AdjectiveList -> m AdjectiveList
 buildAdjectiveList ats context = do
