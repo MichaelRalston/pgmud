@@ -13,6 +13,8 @@ import PGMUD.Types.Skill
 import PGMUD.Adjectives
 import qualified PGMUD.AdjectiveList as AdjectiveList
     
+import Data.Maybe (isJust)
+    
 skillElement :: Skill -> Maybe Element
 skillElement = AdjectiveList.element . skillAdjectives
 
@@ -24,13 +26,9 @@ skillCost = undefined
 skillGen :: PGMUD m => AdjectiveGenerator m
 skillGen = AdjectiveGenerator $ \context -> do
     let
-        hasElement = case AdjectiveList.element context of
-            Nothing -> False
-            Just _ -> True
-        hasDamageCategory = undefined
-        hasWeaponType = case AdjectiveList.weaponClass context of
-            Nothing -> False
-            Just _ -> True
+        hasElement = isJust $ AdjectiveList.element context
+        hasDamageCategory = isJust $ AdjectiveList.damageCategory context
+        hasWeaponType = isJust $ AdjectiveList.weaponClass context
         elementGen = return $ (Just skillGen, ATSkillElement)
         attackGen = if hasElement
             then if hasDamageCategory

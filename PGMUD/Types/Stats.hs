@@ -4,6 +4,7 @@ module PGMUD.Types.Stats
     ( DerivedStat (..)
     , BaseStat (..)
     , HasStatModifiers (..)
+    , DamageType (..)
     ) where
     
 import PGMUD.Prelude
@@ -12,6 +13,8 @@ import PGMUD.Types.GeneralClasses
 data DerivedStat = HP | PD | SD | AP | EV | ACC | PA | SA
     deriving (Eq, Ord, Enum, Bounded, Show)
 data BaseStat = Stamina | Willpower | Health | Defense | Offense | Mental | Physical | Mind | Body | Dexterity | Skill | Energy | Maneuver | Technique | Cleverness
+    deriving (Eq, Ord, Enum, Bounded, Show)
+data DamageType = DTSpecial | DTPhysical | DTHybrid | DTDynamic
     deriving (Eq, Ord, Enum, Bounded, Show)
 
 instance Nameable DerivedStat where
@@ -40,6 +43,12 @@ instance Nameable BaseStat where
     name Maneuver = "maneuver"
     name Technique = "technique"
     name Cleverness = "cleverness"
+    
+instance Nameable DamageType where
+    name DTSpecial = "special"
+    name DTPhysical = "physical"
+    name DTHybrid = "hybrid"
+    name DTDynamic = "dynamic"
     
 instance EnumIndexedValues BaseStat where
     newtype EIVWrapper BaseStat = BaseStatModifier Float deriving (Num, Show, Fractional)

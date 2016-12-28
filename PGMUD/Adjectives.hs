@@ -16,25 +16,27 @@ import Data.List (sortBy)
 import Data.List.Unique (sortUniq)
 import Data.Maybe (mapMaybe)
 
-data AdjectiveWeight = AWValue Int | AWBanned | AWElements { awNeeds :: [Element], awHas :: [Element], awValue :: Int}
+data AdjectiveWeight = AWValue Int | AWBanned | AWNeedsHas { awNeeds :: [ElementOrWeapon], awHas :: [ElementOrWeapon], awValue :: Int}
 
 combineWeights :: AdjectiveWeight -> AdjectiveWeight -> AdjectiveWeight
 combineWeights AWBanned _ = AWBanned
 combineWeights _ AWBanned = AWBanned
 combineWeights (AWValue i) (AWValue i') = AWValue (i+i')
-combineWeights (AWElements n h i) (AWValue i') = AWElements n h (i+i')
-combineWeights (AWValue i') (AWElements n h i) = AWElements n h (i+i')
-combineWeights (AWElements n h i) (AWElements n' h' i') = AWElements (sortUniq (n++n')) (sortUniq (h++h')) (i+i')
+combineWeights (AWNeedsHas n h i) (AWValue i') = AWNeedsHas n h (i+i')
+combineWeights (AWValue i') (AWNeedsHas n h i) = AWNeedsHas n h (i+i')
+combineWeights (AWNeedsHas n h i) (AWNeedsHas n' h' i') = AWNeedsHas (sortUniq (n++n')) (sortUniq (h++h')) (i+i')
 
 applyInteraction :: AdjectiveInteraction -> Adjective -> AdjectiveWeight
 applyInteraction (AINoInteraction) _ = AWValue 0
 applyInteraction (AIExclusive aid) a = if aid == adjId a then AWBanned else AWValue 0
-applyInteraction (AILikesElement e) a = if Just e == adjElem a then AWValue 1 else AWValue 0
-applyInteraction (AIDislikesElement e) a = if Just e == adjElem a then AWValue (-1) else AWValue 0
-applyInteraction (AIHatesElement e) a = if Just e == adjElem a then AWBanned else AWValue 0
-applyInteraction (AINeedsElement e) a = if Just e == adjElem a then AWElements [e] [e] 0 else AWElements [e] [] 0
-applyInteraction (AILikesWeapon e) a = if Just e == adjWeapon a then AWValue 1 else AWValue 0
-applyInteraction (AIDislikesWeapon e) a = if Just e == adjWeapon a then AWValue (-1) else AWValue 0
+applyInteraction (AILikes (EOWElement e)) a = if Just e == adjElem a then AWValue 1 else AWValue 0
+applyInteraction (AILikes (EOWWeapon e)) a = if Just e == adjWeapon a then AWValue 1 else AWValue 0
+applyInteraction (AIHates (EOWElement e)) a = if Just e == adjElem a then AWBanned else AWValue 0
+applyInteraction (AIHates (EOWWeapon e)) a = if Just e == adjWeapon a then AWBanned else AWValue 0
+applyInteraction (AIDislikes (EOWElement e)) a = if Just e == adjElem a then AWValue (-1) else AWValue 0
+applyInteraction (AIDislikes (EOWWeapon e)) a = if Just e == adjWeapon a then AWValue (-1) else AWValue 0
+applyInteraction (AINeeds eow@(EOWElement e)) a = if Just e == adjElem a then AWNeedsHas [eow] [eow] 0 else AWNeedsHas [eow] [] 0
+applyInteraction (AINeeds eow@(EOWWeapon e)) a = if Just e == adjWeapon a then AWNeedsHas [eow] [eow] 0 else AWNeedsHas [eow] [] 0
 
 assignWeights :: [Adjective] -> Adjective -> (AdjectiveWeight, Adjective)
 assignWeights modifiers newAdjective = let
@@ -46,7 +48,7 @@ assignWeights modifiers newAdjective = let
 convertWeightToScore :: (AdjectiveWeight, Adjective) -> Maybe (Double, Adjective)
 convertWeightToScore (AWBanned, _) = Nothing
 convertWeightToScore ((AWValue v), adj) = Just (5 ** (fromInteger $ toInteger v), adj) -- TODO: reevaluate the effect of this on probabilities.
-convertWeightToScore (AWElements{..}, adj) = if awNeeds == awHas then convertWeightToScore ((AWValue awValue), adj) else Nothing
+convertWeightToScore (AWNeedsHas{..}, adj) = if awNeeds == awHas then convertWeightToScore ((AWValue awValue), adj) else Nothing
     
 generateAdjective :: [Adjective] -> [Adjective] -> StdGen -> ([Adjective], StdGen)
 generateAdjective sourceList preChosen rng = let 

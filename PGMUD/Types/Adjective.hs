@@ -10,7 +10,8 @@ module PGMUD.Types.Adjective
     , CanHasEIV
     , SkillClassification (..)
     , AdjectiveList (..)
-    , unwrapAdjectiveList
+    , ElementOrWeapon (..)
+    , unwrapAdjectiveList    
     ) where
     
 import PGMUD.Prelude
@@ -23,8 +24,10 @@ import PGMUD.Types.Effect
 import Data.Csv (FromNamedRecord(..), (.:), FromField(..), NamedRecord, Parser)
 import qualified Data.ByteString.Char8 as BSC
 
-data DamageType = DTSpecial | DTPhysical | DTHybrid | DTDynamic deriving (Show)
-newtype SkillEfficiency = SkillEfficiency Float deriving (Show, Eq, Ord, Num)
+newtype SkillEfficiency = SkillEfficiency () deriving (Show, Eq, Ord, FromField, Bounded, Enum)
+
+instance Nameable SkillEfficiency where
+    name (SkillEfficiency ()) = "efficiency"
 
 data SkillClassification = SCPiercing | SCHoming | SCHeal | SCStrike | SCCharge | SCBlock | SCParry | SCDodge | SCFlurry | SCSmash | SCBerserk deriving (Enum, Ord, Show, Eq, Bounded)
 
@@ -43,9 +46,15 @@ instance Nameable SkillClassification where
 
 newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
 data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
-data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat | AMEfficiency SkillEfficiency | AMDamageType DamageType | AMMagnitude | AMEffect Effect deriving (Show)
+newtype Magnitude = Magnitude () deriving (Eq, Ord, Bounded, Enum, FromField, Show)
+
+instance Nameable Magnitude where
+    name (Magnitude ()) = "magnitude"
+    
+data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat | AMEfficiency SkillEfficiency | AMMagnitude Magnitude deriving (Show)
 data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeaponOrDamage | ATInvisibleDamageType | ATSkillMagnitude | ATChargeEffect | ATParryEffect | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
-data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass deriving (Eq, Show)
+data ElementOrWeapon = EOWElement Element | EOWWeapon WeaponClass deriving (Eq, Show, Ord)
+data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikes ElementOrWeapon | AIDislikes ElementOrWeapon | AIHates ElementOrWeapon | AINeeds ElementOrWeapon deriving (Eq, Show)
 -- current proposal: excludes column, of semicolon-separated values. "interaction-ELEMENT" and "interaction-WEAPON", each with one of: blank, +, -, y, n (y/n element only: hates/needs)
     
 instance FromField AdjectiveContext where
@@ -65,6 +74,8 @@ data Adjective = Adjective
     , adjWeapon :: Maybe WeaponClass
     , adjLevel :: ItemLevel
     , adjClassification :: Maybe SkillClassification
+    , adjDamageType :: Maybe DamageType
+    , adjEffect :: Maybe Effect
     } deriving (Show)
     
 {-newtype DefaultToZero a = DefaultToZero a deriving (Num, Eq, Ord)
@@ -91,6 +102,8 @@ instance FromField AdjectiveModifier where
             (AMElement <$> readField)
         <|> (AMDerivedStat <$> readField)        
         <|> (AMBaseStat <$> readField)
+        <|> (AMEfficiency <$> readField)
+        <|> (AMMagnitude <$> readField)
     
 newtype ColonSeparatedPair a b = ColonSeparatedPair (a, b)
 instance (FromField a, FromField b) => FromField (ColonSeparatedPair a b) where
@@ -109,6 +122,15 @@ newtype NameableWrapper a = NameableWrapper a deriving (Eq, Bounded)
 unwrapNameable :: NameableWrapper a -> a
 unwrapNameable (NameableWrapper a) = a
     
+--data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass | AINeedsWeapon WeaponClass | AIHatesWeapon WeaponClass deriving (Eq, Show)
+
+instance FromField ElementOrWeapon where
+    parseField f = 
+        let readField :: (Nameable b, Bounded b, Enum b) => Parser b
+            readField = unwrapNameable <$> parseField f
+      in    (EOWElement <$> readField)
+        <|> (EOWWeapon <$> readField)
+
 -- TODO: This is inefficient. it should probably just pattern match against the possible names? But that's a little repetitive for now, so atm it's defined in terms of Nameable.
 instance (Nameable a, Bounded a, Enum a) => FromField (NameableWrapper a) where
     parseField f = let c = foldl' (\l r -> if name l == f then l else r) minBound [minBound..maxBound]
@@ -119,40 +141,38 @@ instance (Nameable a, Bounded a, Enum a) => FromField (NameableWrapper a) where
     
 readInteractions :: NamedRecord -> Parser [AdjectiveInteraction]
 readInteractions m = let
-    aiLikesElements = AILikesElement <:> m .: "likes elements"
-    aiDislikesElements = AIDislikesElement <:> m .: "dislikes elements"
-    aiLikesWeapons = AILikesWeapon <:> m .: "likes weapons"
-    aiDislikesWeapons = AIDislikesWeapon <:> m .: "dislikes weapons"
-    aiHatesElements = AIHatesElement <:> m .: "banned elements"
-    aiNeedsElements = AINeedsElement <:> m .: "needs elements"
+    aiLikes = AILikes <:$> m .: "likes"
+    aiDislikes = AIDislikes <:$> m .: "dislikes"
+    aiHates = AIHates <:$> m .: "incompatible"
+    aiNeeds = AINeeds <:$> m .: "needs"
     aiExcludes = (map (AIExclusive . AdjectiveId) <$> unwrapSSL <$> m .: "excludes")
   in
-    concat <$> sequence [aiExcludes, aiHatesElements, aiNeedsElements, aiLikesElements, aiDislikesElements, aiLikesWeapons, aiDislikesWeapons]
+    concat <$> sequence [aiExcludes, aiHates, aiNeeds, aiLikes, aiDislikes]
 
-(<::>) :: (a -> b) -> Parser (SemicolonSeparatedList (ColonSeparatedPair c (NameableWrapper a))) -> Parser [(c, b)]
-(<::>) constructor field = (map ((mapSnd (constructor . unwrapNameable)) . unwrapCSP)) <$> unwrapSSL <$> field
-infixr 7 <::>
-
-(<:>) :: (a -> b) -> Parser (SemicolonSeparatedList ((NameableWrapper a))) -> Parser [b]
-(<:>) constructor field = (map (constructor . unwrapNameable)) <$> unwrapSSL <$> field
-infixr 7 <:>
+(<:$>) :: (a -> b) -> Parser (SemicolonSeparatedList (a)) -> Parser [b]
+(<:$>) constructor field = (map constructor) <$> unwrapSSL <$> field
+infixr 7 <:$>
 
 instance FromNamedRecord Adjective where
     parseNamedRecord m = let 
         so = m .: "sort order"
         aName = m .: "adjective"
         context = m .: "context"
-        amElements = AMElement <::> m .: "elemental affinities"
-        amStatMods = map unwrapCSP <$> unwrapSSL <$> m .: "stat modifiers"
-        modifiers = filter (\a -> fst a /= 0) <$> concat <$> sequence [amStatMods, amElements]
+        amStatMods = map unwrapCSP <$> unwrapSSL <$> m .: "modifiers"
+        modifiers = filter (\a -> fst a /= 0) <$> amStatMods
         interactions = readInteractions m
         adjid = m .: "id"
-        element = (\(f, AMElement a) -> if f /= 0 then Just a else Nothing) <$> foldl' (\l r -> if fst l > fst r then l else r) (0, AMElement minBound) <$> amElements
+        parseElementInteraction = \(f, am) -> if f == 0 then Nothing else case am of
+            AMElement a -> Just a
+            _ -> Nothing
+        element = parseElementInteraction <$> foldl' (\l r -> if fst l > fst r then l else r) (0, AMElement minBound) <$> amStatMods
         weapon = (unwrapNameable <$>) <$> m .: "weapon class"
         level = m .: "ilvl"
         skillClassification = (unwrapNameable <$>) <$> m .: "classification"
+        damageType = (unwrapNameable <$>) <$> m .: "damage type"
+        effect = (unwrapNameable <$>) <$> m .: "effect"
       in
-        Adjective <$> so <*> aName <*> context <*> modifiers <*> interactions <*> adjid <*> element <*> weapon <*> level <*> skillClassification
+        Adjective <$> so <*> aName <*> context <*> modifiers <*> interactions <*> adjid <*> element <*> weapon <*> level <*> skillClassification <*> damageType <*> effect
     
 instance Eq Adjective where
     (==) l r = adjId l == adjId r

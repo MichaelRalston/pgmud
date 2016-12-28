@@ -7,6 +7,7 @@ module PGMUD.AdjectiveList
     , stringify
     , skillClassification
     , element
+    , damageCategory
     ) where
     
 import PGMUD.PGMUD 
@@ -19,6 +20,9 @@ import Data.Text (intercalate)
 
 element :: AdjectiveList -> Maybe Element
 element (AdjectiveList al) = headMay $ mapMaybe adjElem al
+
+damageCategory :: AdjectiveList -> Maybe DamageType
+damageCategory (AdjectiveList al) = headMay $ mapMaybe adjDamageType al
 
 weaponClass :: AdjectiveList -> Maybe WeaponClass
 weaponClass (AdjectiveList al) = headMay $ mapMaybe adjWeapon al
