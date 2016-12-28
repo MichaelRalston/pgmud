@@ -28,11 +28,3 @@ instance Nameable WeaponClass where
 
 instance FromField ItemLevel where
     parseField f = ItemLevel <$> parseField f
-
--- TODO: This is inefficient. it should probably just pattern match against the possible names? But that's a little repetitive for now, so atm it's defined in terms of Nameable.
-instance FromField WeaponClass where
-    parseField f = let c = foldl' (\l r -> if name l == f then l else r) minBound [minBound..maxBound]
-      in
-        if name c == f
-            then pure c
-            else mzero

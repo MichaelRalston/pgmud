@@ -15,6 +15,7 @@ module PGMUD.Prelude
     , traceWith
     , traceM
     , traceShowM
+    , Alternative (..)
     ) where
     
 import Data.ByteString (ByteString)
@@ -24,6 +25,7 @@ import Control.Monad (MonadPlus(..))
 import Data.List (foldl')
 import Data.String (IsString)
 import Data.Monoid ((<>))
+import Control.Applicative (Alternative (..))
 
 import Debug.Trace (traceShow, trace, traceM, traceShowM)
 

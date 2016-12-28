@@ -17,6 +17,8 @@ import Data.Text (intercalate)
 
 import Data.Maybe (mapMaybe)
     
+-- TODO: newtype AdjectiveList = AdjectiveList [Adjective], then promote some of this stuff up to that.
+    
 generateWeapon :: PGMUD m => [Adjective] -> m Weapon
 generateWeapon configuration = do
     adjectives <- buildAdjectiveList [ATWeaponClass, ATWeaponElement, ATWeaponElement] configuration

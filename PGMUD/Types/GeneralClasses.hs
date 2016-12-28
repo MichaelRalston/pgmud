@@ -16,7 +16,7 @@ class (Bounded e, Enum e) => EnumIndexedValues e where
     spliceAt v e wrapped = let 
         l = wrapperDestructor wrapped
       in 
-        wrapperConstructor (take (fromEnum e - 1) l ++ [v] ++ drop (fromEnum e) l)
+        wrapperConstructor ((take (fromEnum e) l) ++ [v] ++ (drop (fromEnum e+1) l))
 
 instance EnumIndexedValues e => Monoid (EIVOuterWrapper e) where
     mempty = wrapperConstructor $ map (\_ -> innerConstructor 0) ([minBound..maxBound] :: [e])
