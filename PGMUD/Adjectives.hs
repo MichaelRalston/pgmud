@@ -8,7 +8,6 @@ module PGMUD.Adjectives
 import PGMUD.Prelude
 import PGMUD.PGMUD
 import PGMUD.Types.Adjective
-import Control.Monad (foldM)
 import Data.List (sortBy)
 import Data.List.Unique (sortUniq)
 import Data.Maybe (mapMaybe)
@@ -60,10 +59,29 @@ generateAdjective sourceList preChosen rng = let
   in
     (preChosen ++ chosen, rng')
 
--- TODO: Some kind of templating system, to make it easier to select different adjective templates.
+generateAdjectives :: PGMUD m => AdjectiveGenerator -> AdjectiveList -> m AdjectiveList
+generateAdjectives gen context = do
+    let (gen', t) = selectAdjectiveType gen context
+    source <- getAdjectiveList t
+    list' <- withRandom $ generateAdjective source $ unwrapAdjectiveList context
+    let list = AdjectiveList list'
+    case gen' of
+        Nothing -> return list
+        Just gen'' -> generateAdjectives gen'' list
+    
+simpleGen :: [AdjectiveType] -> AdjectiveGenerator
+simpleGen [] = error "Cannot generate an empty list"
+simpleGen (at:[]) = AdjectiveGenerator $ const (Nothing, at)
+simpleGen (at:rest) = AdjectiveGenerator $ const (Just $ simpleGen rest, at)
+    
 buildAdjectiveList :: PGMUD m => [AdjectiveType] -> [Adjective] -> m [Adjective]
 buildAdjectiveList ats context = do
-    sources <- mapM getAdjectiveList ats
+    unsortedAdjectives <- generateAdjectives (simpleGen ats) $ AdjectiveList context
+    return $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
     
-    unsortedAdjectives <- (foldM (\l r -> withRandom $ generateAdjective r l)) context sources
-    return $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) unsortedAdjectives
+newtype AdjectiveList = AdjectiveList [Adjective]
+unwrapAdjectiveList :: AdjectiveList -> [Adjective]
+unwrapAdjectiveList (AdjectiveList al) = al
+    
+newtype AdjectiveGenerator = AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> (Maybe AdjectiveGenerator, AdjectiveType) }
+
