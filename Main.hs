@@ -6,7 +6,7 @@ import Control.Monad.Trans.State (evalStateT)
 main :: IO ()
 main = do
     s <- getInitialState
-    w <- evalStateT (generateWeapon []) s
+    w <- evalStateT (generateWeapon mempty) s
     putStrLn "\n"
     traceShowM ("weapon", w)
     putStrLn "\n"

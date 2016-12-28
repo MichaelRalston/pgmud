@@ -8,6 +8,9 @@ module PGMUD.Types.Adjective
     , AdjectiveInteraction (..)
     , AdjectiveType (..)
     , CanHasEIV
+    , AdjectiveList (..)
+    , unwrapAdjectiveList
+    , AdjectiveGenerator (..)
     ) where
     
 import PGMUD.Prelude
@@ -15,13 +18,13 @@ import PGMUD.Types.GeneralClasses
 import PGMUD.Types.Gear
 import PGMUD.Types.Stats
 import PGMUD.Types.Elements
+import PGMUD.Types.Effect
 
 import Data.Csv (FromNamedRecord(..), (.:), FromField(..), NamedRecord, Parser)
 import qualified Data.ByteString.Char8 as BSC
 
 data DamageType = DTSpecial | DTPhysical | DTHybrid | DTDynamic deriving (Show)
 newtype SkillEfficiency = SkillEfficiency Float deriving (Show, Eq, Ord, Num)
-data Effect = EffectError deriving (Show)
 
 newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
 data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
@@ -159,3 +162,10 @@ type CanHasEIV e = (HasEIV (Float, AdjectiveModifier) e, EnumIndexedValues e)
     
 instance CanHasEIV e => HasEIV Adjective e where
     getEIV = mconcat . (map getEIV) . adjModifiers
+
+newtype AdjectiveList = AdjectiveList [Adjective] deriving (Monoid, Show)
+unwrapAdjectiveList :: AdjectiveList -> [Adjective]
+unwrapAdjectiveList (AdjectiveList al) = al
+    
+newtype AdjectiveGenerator = AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> (Maybe AdjectiveGenerator, AdjectiveType) }
+

@@ -74,14 +74,8 @@ simpleGen [] = error "Cannot generate an empty list"
 simpleGen (at:[]) = AdjectiveGenerator $ const (Nothing, at)
 simpleGen (at:rest) = AdjectiveGenerator $ const (Just $ simpleGen rest, at)
     
-buildAdjectiveList :: PGMUD m => [AdjectiveType] -> [Adjective] -> m [Adjective]
+buildAdjectiveList :: PGMUD m => [AdjectiveType] -> AdjectiveList -> m AdjectiveList
 buildAdjectiveList ats context = do
-    unsortedAdjectives <- generateAdjectives (simpleGen ats) $ AdjectiveList context
-    return $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
+    unsortedAdjectives <- generateAdjectives (simpleGen ats) context
+    return $ AdjectiveList $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
     
-newtype AdjectiveList = AdjectiveList [Adjective]
-unwrapAdjectiveList :: AdjectiveList -> [Adjective]
-unwrapAdjectiveList (AdjectiveList al) = al
-    
-newtype AdjectiveGenerator = AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> (Maybe AdjectiveGenerator, AdjectiveType) }
-

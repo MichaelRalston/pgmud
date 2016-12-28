@@ -16,12 +16,13 @@ module PGMUD.Prelude
     , traceM
     , traceShowM
     , Alternative (..)
+    , join
     ) where
     
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (fromStrict)
 import Data.Text (Text)
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), join)
 import Data.List (foldl')
 import Data.String (IsString)
 import Data.Monoid ((<>))

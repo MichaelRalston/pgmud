@@ -1,3 +1,3 @@
 module PGMUD.Types.Effect where
 
-data Effect = Effect
+data Effect = Effect deriving (Show)

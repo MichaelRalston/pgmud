@@ -7,7 +7,7 @@ module PGMUD.Types.Weapon
 import PGMUD.Types.Adjective
 import PGMUD.Types.GeneralClasses
     
-data Weapon = Weapon { weaponAdjectives :: [Adjective] } deriving (Show)
+data Weapon = Weapon { weaponAdjectives :: AdjectiveList } deriving (Show)
 
 instance CanHasEIV e => HasEIV Weapon e where
-    getEIV = mconcat . (map getEIV) . weaponAdjectives
+    getEIV = mconcat . (map getEIV) . unwrapAdjectiveList . weaponAdjectives

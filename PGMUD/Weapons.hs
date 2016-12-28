@@ -12,29 +12,25 @@ import PGMUD.PGMUD
 import PGMUD.Types.Weapon (Weapon(..))
 import PGMUD.Prelude
 import PGMUD.Adjectives
-import PGMUD.Types.Adjective (adjWeapon, adjLevel, adjName)
-import Data.Text (intercalate)
-
-import Data.Maybe (mapMaybe)
+import qualified PGMUD.AdjectiveList as AdjectiveList
     
--- TODO: newtype AdjectiveList = AdjectiveList [Adjective], then promote some of this stuff up to that.
-    
-generateWeapon :: PGMUD m => [Adjective] -> m Weapon
+generateWeapon :: PGMUD m => AdjectiveList -> m Weapon
 generateWeapon configuration = do
     adjectives <- buildAdjectiveList [ATWeaponClass, ATWeaponElement, ATWeaponElement] configuration
     return $ Weapon adjectives
     
 weaponClass :: Weapon -> WeaponClass
-weaponClass = head . (mapMaybe adjWeapon) . weaponAdjectives
+weaponClass w = case AdjectiveList.weaponClass $ weaponAdjectives w of
+    Just wc -> wc
+    Nothing -> error "Weapons must have a weapon class."
 
 weaponEffect :: Weapon -> Effect
-weaponEffect = undefined
+weaponEffect w = case AdjectiveList.effect $ weaponAdjectives w of
+    Just e -> e
+    Nothing -> error "Weapons must have an effect."
 
 weaponLevel :: Weapon -> ItemLevel
-weaponLevel = sum . (map adjLevel) . weaponAdjectives
+weaponLevel = AdjectiveList.itemLevel . weaponAdjectives
 
 weaponName :: Weapon -> Text
-weaponName w = let
-    names = map adjName $ weaponAdjectives w
-  in
-    intercalate " " names
+weaponName = AdjectiveList.stringify . weaponAdjectives
