@@ -44,7 +44,7 @@ instance Nameable SkillClassification where
 newtype AdjectiveId = AdjectiveId Text deriving (Eq, Ord, FromField, Show)
 data AdjectiveContext = ACWeapon | ACSkill deriving (Show)
 data AdjectiveModifier = AMElement Element | AMDerivedStat DerivedStat | AMBaseStat BaseStat | AMEfficiency SkillEfficiency | AMDamageType DamageType | AMMagnitude | AMEffect Effect deriving (Show)
-data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeapon | ATSkillWeaponGroup | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
+data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeaponOrDamage | ATInvisibleDamageType | ATSkillMagnitude | ATChargeEffect | ATParryEffect | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
 data AdjectiveInteraction = AINoInteraction | AIExclusive AdjectiveId | AILikesElement Element | AIDislikesElement Element | AIHatesElement Element | AINeedsElement Element | AILikesWeapon WeaponClass | AIDislikesWeapon WeaponClass deriving (Eq, Show)
 -- current proposal: excludes column, of semicolon-separated values. "interaction-ELEMENT" and "interaction-WEAPON", each with one of: blank, +, -, y, n (y/n element only: hates/needs)
     

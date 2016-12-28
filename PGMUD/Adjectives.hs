@@ -5,6 +5,7 @@ module PGMUD.Adjectives
     , buildAdjectiveList
     , simpleGen
     , composedGen
+    , trivialGen
     ) where
     
 import PGMUD.Prelude
@@ -14,7 +15,6 @@ import PGMUD.Types.AdjectiveGenerator
 import Data.List (sortBy)
 import Data.List.Unique (sortUniq)
 import Data.Maybe (mapMaybe)
-import System.Random (randomR)
 
 data AdjectiveWeight = AWValue Int | AWBanned | AWElements { awNeeds :: [Element], awHas :: [Element], awValue :: Int}
 
@@ -42,10 +42,6 @@ assignWeights modifiers newAdjective = let
     interactions = [applyInteraction processInteraction modifier | processInteraction <- adjInteractions newAdjective, modifier <- modifiers]    
   in
     (weight, newAdjective)
-
-chooseAtPos :: (Ord b, Num b) => [(b, a)] -> b -> [a]
-chooseAtPos [] _ = []
-chooseAtPos ((score, r):rest) pos = if score >= pos then [r] else chooseAtPos rest (pos-score)
     
 convertWeightToScore :: (AdjectiveWeight, Adjective) -> Maybe (Double, Adjective)
 convertWeightToScore (AWBanned, _) = Nothing
@@ -56,9 +52,7 @@ generateAdjective :: [Adjective] -> [Adjective] -> StdGen -> ([Adjective], StdGe
 generateAdjective sourceList preChosen rng = let 
     candidates = map (assignWeights preChosen) sourceList
     scoredCandidates = mapMaybe convertWeightToScore candidates
-    scoreSum = foldl' (+) 0 $ map fst scoredCandidates
-    (pos, rng') = randomR (0, scoreSum) rng
-    chosen = chooseAtPos scoredCandidates pos
+    (chosen, rng') = chooseRandom scoredCandidates rng
   in
     (preChosen ++ chosen, rng')
 
@@ -88,3 +82,6 @@ composedGen (AdjectiveGenerator{..}) r = AdjectiveGenerator $ \context -> do
     case l of
         Nothing -> return (Just r, t)
         Just l' -> return (Just $ composedGen l' r, t)
+        
+trivialGen :: PGMUD m => m (Maybe (AdjectiveGenerator m), AdjectiveType) -> AdjectiveGenerator m
+trivialGen = AdjectiveGenerator . const

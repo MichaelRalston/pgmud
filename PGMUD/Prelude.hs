@@ -17,6 +17,7 @@ module PGMUD.Prelude
     , traceShowM
     , Alternative (..)
     , join
+    , chooseRandom
     ) where
     
 import Data.ByteString (ByteString)
@@ -27,6 +28,7 @@ import Data.List (foldl')
 import Data.String (IsString)
 import Data.Monoid ((<>))
 import Control.Applicative (Alternative (..))
+import System.Random (randomR, StdGen)
 
 import Debug.Trace (traceShow, trace, traceM, traceShowM)
 
@@ -45,3 +47,14 @@ traceTagged tag v = traceShow (tag, v) v
 mapSnd :: (a -> b) -> (c, a) -> (c, b)
 mapSnd f (a, b) = (a, f b)
 
+chooseAtPos :: (Ord b, Num b) => [(b, a)] -> b -> [a]
+chooseAtPos [] _ = []
+chooseAtPos ((score, r):rest) pos = if score >= pos then [r] else chooseAtPos rest (pos-score)
+
+chooseRandom :: [(Double, a)] -> StdGen -> ([a], StdGen)
+chooseRandom scoredCandidates rng = let 
+    scoreSum = foldl' (+) 0 $ map fst scoredCandidates
+    (pos, rng') = randomR (0, scoreSum) rng
+    chosen = chooseAtPos scoredCandidates pos
+  in
+    (chosen, rng')

@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, ScopedTypeVariables #-}
 module PGMUD.Skills
     ( skillElement
     , skillCost
@@ -6,6 +6,7 @@ module PGMUD.Skills
     ) where
 
 import PGMUD.PGMUD 
+import PGMUD.Prelude
 import PGMUD.Types.Adjective
 import PGMUD.Types.AdjectiveGenerator
 import PGMUD.Types.Skill
@@ -19,24 +20,35 @@ skillCost :: Skill -> WeaponClass -> APAmount
 skillCost = undefined
 
 -- data AdjectiveGenerator m = (PGMUD m) => AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> m (Maybe (AdjectiveGenerator m), AdjectiveType) }
--- data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeapon | ATSkillWeaponGroup | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
+--data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeaponOrDamage | ATInvisibleDamageType | ATChargeEffect | ATParryEffect | ATSkillMagnitude | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)
 skillGen :: PGMUD m => AdjectiveGenerator m
 skillGen = AdjectiveGenerator $ \context -> do
     let
         hasElement = case AdjectiveList.element context of
             Nothing -> False
             Just _ -> True
+        hasDamageCategory = undefined
+        hasWeaponType = case AdjectiveList.weaponClass context of
+            Nothing -> False
+            Just _ -> True
         elementGen = return $ (Just skillGen, ATSkillElement)
         attackGen = if hasElement
-            then undefined
+            then if hasDamageCategory
+                then return $ (Nothing, ATSkillMagnitude)
+                else if hasWeaponType
+                    then return $ (Just skillGen, ATInvisibleDamageType)
+                    else return $ (Just skillGen, ATSkillWeaponOrDamage)
             else elementGen
-        defenseGen = undefined
-        chargeGen = undefined
-        parryGen = undefined
-        healGen = undefined
-        selectQuality = undefined
+        defenseGen = return $ (Nothing, ATSkillMagnitude)
+        parryAndChargeGen = trivialGen $ return $ (Nothing, ATSkillMagnitude)
+        chargeGen = return $ (Just parryAndChargeGen, ATChargeEffect)
+        parryGen = do
+            [parryOrCharge] <- withRandom $ chooseRandom [(0.2, ATChargeEffect), (0.8, ATParryEffect)]
+            return $ (Just parryAndChargeGen, parryOrCharge)
+        healGen = return $ (Nothing, ATSkillMagnitude)
+        selectQuality = chooseRandom [(0.15, [ATSkillQuality, ATSkillQuality, ATSkillQuality]), (0.35, [ATSkillQuality, ATSkillQuality]), (0.5, [ATSkillQuality])]
         qualityGen = AdjectiveGenerator $ \qualityContext -> do
-            qualityChoice <- withRandom selectQuality
+            qualityChoice <- concat <$> withRandom selectQuality
             let (AdjectiveGenerator {..}) = composedGen (simpleGen qualityChoice) skillGen
             selectAdjectiveType qualityContext            
     case AdjectiveList.skillClassification context of
