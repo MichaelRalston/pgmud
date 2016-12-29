@@ -2,6 +2,7 @@
 
 module PGMUD.Adjectives
     ( generateAdjective
+    , generateAdjectives
     , buildAdjectiveList
     , simpleGen
     , composedGen
@@ -59,7 +60,12 @@ generateAdjective sourceList preChosen rng = let
     (preChosen ++ chosen, rng')
 
 generateAdjectives :: PGMUD m => AdjectiveGenerator m -> AdjectiveList -> m AdjectiveList
-generateAdjectives (AdjectiveGenerator{..}) context = do
+generateAdjectives gen context = do
+    unsortedAdjectives <- generateUnsortedAdjectives gen context
+    return $ AdjectiveList $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
+    
+generateUnsortedAdjectives :: PGMUD m => AdjectiveGenerator m -> AdjectiveList -> m AdjectiveList
+generateUnsortedAdjectives (AdjectiveGenerator{..}) context = do
     (gen', t) <- selectAdjectiveType context
     source <- getAdjectiveList t
     list' <- withRandom $ generateAdjective source $ unwrapAdjectiveList context
@@ -74,9 +80,8 @@ simpleGen (at:[]) = AdjectiveGenerator $ const $ return (Nothing, at)
 simpleGen (at:rest) = AdjectiveGenerator $ const $ return (Just $ simpleGen rest, at)
     
 buildAdjectiveList :: PGMUD m => [AdjectiveType] -> AdjectiveList -> m AdjectiveList
-buildAdjectiveList ats context = do
-    unsortedAdjectives <- generateAdjectives (simpleGen ats) context
-    return $ AdjectiveList $ sortBy (\l r -> adjSortOrder l `compare` adjSortOrder r) $ unwrapAdjectiveList unsortedAdjectives
+buildAdjectiveList ats context = generateAdjectives (simpleGen ats) context
+    
     
 composedGen :: PGMUD m => AdjectiveGenerator m -> AdjectiveGenerator m -> AdjectiveGenerator m
 composedGen (AdjectiveGenerator{..}) r = AdjectiveGenerator $ \context -> do

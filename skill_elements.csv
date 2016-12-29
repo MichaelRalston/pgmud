@@ -1,0 +1,11 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+se-laser,Laser,75,skill,,,,,,,,1:light,,,
+se-crystal,Crystalline,75,skill,,,,,,,,1:order,,,
+se-unpredictable,Unpredictable,75,skill,,,,,,,,1:chaos,,,
+se-burning,Burning,75,skill,,,,,,,,1:fire,,,
+se-water,Watery,75,skill,,,,,,,,1:water,,,
+se-rock,Rock,75,skill,,,,,,,,1:earth,,,
+se-wind,Wind,75,skill,,,,,,,,1:air,,,
+se-steel,Steel,75,skill,,,,,,,,1:metal,,,
+se-blood,Blood,75,skill,,,,,,,,1:blood,,,
+se-decay,Death,75,skill,,,,,,,,1:decay,,,

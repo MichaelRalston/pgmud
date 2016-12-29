@@ -1,0 +1,12 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+sc-bullet,Bullet,100,skill,,,,,,,,,homing,,
+sc-healing,Healing,100,skill,,,,,,,,,heal,,
+sc-pierce,Pierce,100,skill,,,,,,,,,piercing,,
+sc-strike,Strike,100,skill,,,,,,,,,strike,,
+sc-charge,Charge,100,skill,,,,,,,,,charge,,
+sc-block,Block,100,skill,,,,,,,,,block,,
+sc-parry,Parry,100,skill,,,,,,,,,parry,,
+sc-dodge,Dodge,100,skill,,,,,,,,,dodge,,
+sc-flurry,Flurry,100,skill,,,,,,,,,flurry,,
+sc-smash,Smash,100,skill,,,,,,,,,smash,,
+sc-berserk,Berserk,100,skill,,,,,,,,,berserk,,

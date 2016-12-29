@@ -78,14 +78,14 @@ data Adjective = Adjective
     , adjEffect :: Maybe Effect
     } deriving (Show)
     
-{-newtype DefaultToZero a = DefaultToZero a deriving (Num, Eq, Ord)
+newtype DefaultToZero a = DefaultToZero a deriving (Num, Eq, Ord)
 instance (Num a, FromField a) => FromField (DefaultToZero a) where
     parseField "" = pure 0
     parseField s = DefaultToZero <$> parseField s
     
 unwrapDTZ :: DefaultToZero a -> a
 unwrapDTZ (DefaultToZero f) = f
-  -}  
+
 newtype SemicolonSeparatedList a = SemicolonSeparatedList [a]
 instance FromField a => FromField (SemicolonSeparatedList a) where
     parseField "" = pure $ SemicolonSeparatedList []
@@ -167,7 +167,7 @@ instance FromNamedRecord Adjective where
             _ -> Nothing
         element = parseElementInteraction <$> foldl' (\l r -> if fst l > fst r then l else r) (0, AMElement minBound) <$> amStatMods
         weapon = (unwrapNameable <$>) <$> m .: "weapon class"
-        level = m .: "ilvl"
+        level = unwrapDTZ <$> m .: "ilvl"
         skillClassification = (unwrapNameable <$>) <$> m .: "classification"
         damageType = (unwrapNameable <$>) <$> m .: "damage type"
         effect = (unwrapNameable <$>) <$> m .: "effect"

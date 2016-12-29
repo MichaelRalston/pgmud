@@ -4,5 +4,5 @@ module PGMUD.Types.Skill
 
 import PGMUD.Types.Adjective
     
-data Skill = Skill { skillAdjectives :: AdjectiveList }
+data Skill = Skill { skillAdjectives :: AdjectiveList } deriving (Show)
 

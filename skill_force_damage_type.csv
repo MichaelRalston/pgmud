@@ -1,0 +1,4 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+sfdt-physical,,0,skill,,,,,staff;book;fist;orb;wand;rapier;bow;dagger;whip,,,,,physical,
+sfdt-mental,,0,skill,,,,,staff;fist;axe;rapier;spear;bow;dagger;twohanded;thrown,,,,,special,
+sfdt-hybrid,,0,skill,,,,,book;orb;wand;axe;spear;whip;twohanded;thrown,,,,,hybrid,

@@ -10,6 +10,7 @@ module PGMUD.PGMUD
     ) where
     
 import PGMUD.Types
+import PGMUD.Prelude
 import System.Random (StdGen, getStdRandom)
 import Control.Monad.IO.Class (liftIO, MonadIO)
 import Data.Map.Strict (Map, (!))

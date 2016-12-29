@@ -3,6 +3,7 @@ module PGMUD.Skills
     ( skillElement
     , skillCost
     , skillGen
+    , skillName
     ) where
 
 import PGMUD.PGMUD 
@@ -20,6 +21,10 @@ skillElement = AdjectiveList.element . skillAdjectives
 
 skillCost :: Skill -> WeaponClass -> APAmount
 skillCost = undefined
+
+skillName :: Skill -> Text
+skillName = AdjectiveList.stringify . skillAdjectives
+
 
 -- data AdjectiveGenerator m = (PGMUD m) => AdjectiveGenerator { selectAdjectiveType :: AdjectiveList -> m (Maybe (AdjectiveGenerator m), AdjectiveType) }
 --data AdjectiveType = ATWeaponClass | ATWeaponElement | ATSkillWeaponOrDamage | ATInvisibleDamageType | ATChargeEffect | ATParryEffect | ATSkillMagnitude | ATWeaponQuality | ATSkillQuality | ATSkillClassification | ATSkillElement deriving (Show, Eq, Ord)

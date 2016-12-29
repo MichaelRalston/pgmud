@@ -1,0 +1,6 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+smw-openhand,Open-Handed,50,skill,,,,,,,fist,,,special,
+smw-closehand,Closed-Handed,50,skill,,,,,,,fist,,,physical,
+smw-thoughtful,Thoughtful,50,skill,,,,,,,,,,special,
+smw-magewarrior,Magewarrior's,50,skill,,,,,,,,,,hybrid,
+smw-flexible,Flexible,50,skill,,,,,,,,,,dynamic,

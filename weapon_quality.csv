@@ -1,0 +1,6 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+wq-fine,Fine,25,weapon,,,,,,10,,,,,
+wq-sharp,Sharp,25,weapon,,,,,,-5,,10:offense,,,
+wq-masterwork,Masterwork,25,weapon,,,,,,30,,,,,
+wq-poor,Poor,25,weapon,,,,,,-20,,,,,
+wq-conductive,Conductive,25,weapon,,,,,,-5,,10:mental,,,

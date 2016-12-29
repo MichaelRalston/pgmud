@@ -1,0 +1,7 @@
+id,adjective,sort order,context,excludes,likes,dislikes,needs,incompatible,ilvl,weapon class,modifiers,classification,damage type,effect
+sq-magnificent,Magnificent,25,skill,,,,,,,,50:magnitude;-25:efficiency,,,
+sq-efficient,Efficient,25,skill,,,,,,,,-25:magnitude;25:efficiency,,,
+sq-vefficient,Optimized,25,skill,,,,,,,,-25:magnitude;50:efficiency,,,
+sq-enormous,Enormous,25,skill,,,,,,,,100:magnitude;-25:efficiency,,,
+sq-advanced,Advanced,25,skill,,,,,,,,50:magnitude,,,
+sq-leveltwo,Level II,150,skill,,,,,,,,100:magnitude,,,
